@@ -33,11 +33,16 @@
 			<Add option="-std=c++14" />
 			<Add option="-m64" />
 			<Add directory="../selene/include" />
+			<Add directory="/usr/include/lua5.3" />
 		</Compiler>
 		<Linker>
 			<Add option="-m64" />
+			<Add option="-llua5.3" />
 		</Linker>
 		<Unit filename="main.cpp" />
+		<Unit filename="test.lua">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Extensions>
 			<envvars />
 			<code_completion />
