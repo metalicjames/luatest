@@ -33,7 +33,7 @@ int main()
 {
     sel::State state;
 
-    //lua_sethook(state.getState(), &programCounterHook, LUA_MASKCOUNT, 1);
+    lua_sethook(state.getState(), &programCounterHook, LUA_MASKCOUNT, 1);
 
     state["StringVector"].SetClass<StringVector>("push", &StringVector::push, "get", &StringVector::get);
 

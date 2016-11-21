@@ -47,8 +47,8 @@ end
 
 function testSandbox()
     x = StringVector.new()
-    x.push("2")
-    print(x.get(0))
+    x:push("2")
+    print(x:get(0))
 end
 
 function test()
