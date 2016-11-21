@@ -1,11 +1,18 @@
 #include <selene.h>
+#include <lua5.3/lauxlib.h>
 
 int pc = 0;
+const int pcLimit = 500;
 
 void programCounterHook(lua_State* luaState, lua_Debug* event)
 {
     pc++;
     std::cout << "pc: " << pc << std::endl;
+
+    if(pc > pcLimit)
+    {
+        luaL_error(luaState, "Script exceeded the instruction limit");
+    }
 }
 
 class StringVector
@@ -26,7 +33,7 @@ class StringVector
 
 int main()
 {
-    sel::State state;
+    sel::State state(true);
 
     lua_sethook(state.getState(), &programCounterHook, LUA_MASKCOUNT, 1);
 
@@ -35,7 +42,9 @@ int main()
     //state.loadString("function test()\n    return 4\nend\n");
     state.Load("./test.lua");
 
-    std::cout << (int)state["test"]();
+    std::cout << (bool)state["sandboxTest"]();
+
+    std::cout << "\nWe got this far...";
 
     return 0;
 }
