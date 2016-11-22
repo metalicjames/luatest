@@ -4,7 +4,8 @@ local e=_ENV
 -- sample sandbox environment
 sandbox_env = {
   StringVector = {new = StringVector.new, get = StringVector.get, push = StringVector.push,},
-  ipairs = ipairs,
+  print = print,
+  --[[ipairs = ipairs,
   next = next,
   pairs = pairs,
   pcall = pcall,
@@ -30,13 +31,10 @@ sandbox_env = {
       min = math.min, modf = math.modf, pi = math.pi, pow = math.pow,
       rad = math.rad, random = math.random, sin = math.sin, sinh = math.sinh,
       sqrt = math.sqrt, tan = math.tan, tanh = math.tanh },
-  os = { clock = os.clock, difftime = os.difftime, time = os.time },
+  os = { clock = os.clock, difftime = os.difftime, time = os.time },]]--
 }
 
 function run_sandbox(sb_env, sb_func, ...)
-  x = StringVector.new()
-  x.push("we")
-  print(x.get(0))
   local sb_orig_env=_ENV
   if (not sb_func) then return nil end
   _ENV=sb_env
@@ -47,8 +45,9 @@ end
 
 function testSandbox()
     x = StringVector.new()
-    x:push("2")
+    x:push("wut")
     print(x:get(0))
+    x = nil
 end
 
 function test()

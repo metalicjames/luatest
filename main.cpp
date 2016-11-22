@@ -31,15 +31,15 @@ class StringVector
 
 int main()
 {
-    sel::State state;
+    sel::State state{true};
 
     lua_sethook(state.getState(), &programCounterHook, LUA_MASKCOUNT, 1);
 
     state["StringVector"].SetClass<StringVector>("push", &StringVector::push, "get", &StringVector::get);
 
-    state.Load("./test.lua");
+    state.Load("./sandbox.lua");
 
-    const int result = state["test"]();
+    const std::string result = state["test"]();
     std::cout << result;
 
     return 0;
