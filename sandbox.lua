@@ -4,6 +4,7 @@ local e=_ENV
 -- sample sandbox environment
 sandbox_env = {
   StringVector = {new = StringVector.new, get = StringVector.get, push = StringVector.push,},
+  chainTip = {height = chainTip.height},
   print = print,
   --[[ipairs = ipairs,
   next = next,
@@ -43,14 +44,16 @@ function run_sandbox(sb_env, sb_func, ...)
   return e.table.unpack(sb_ret)
 end
 
-function testSandbox()
-    x = StringVector.new()
-    x:push("wut")
-    print(x:get(0))
-    x = nil
-end
-
-function test()
-    pcall_rc, result_or_err_msg = run_sandbox(sandbox_env, testSandbox)
+function verifyTransaction()
+    pcall_rc, result_or_err_msg = run_sandbox(sandbox_env, verify)
     return result_or_err_msg
 end
+
+function verify()
+    if chainTip:height() >= 500 then
+        return true
+    else
+        return false
+    end
+end
+
