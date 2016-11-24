@@ -38,6 +38,8 @@
 		<Linker>
 			<Add option="-m64" />
 			<Add option="-llua5.3" />
+			<Add option="-ljsoncpp" />
+			<Add option="-lCryptoKernel" />
 		</Linker>
 		<Unit filename="main.cpp" />
 		<Unit filename="sandbox.lua" />

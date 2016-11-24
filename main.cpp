@@ -2,6 +2,7 @@
 #include <lua5.3/lauxlib.h>
 
 #include <cryptokernel/blockchain.h>
+#include <cryptokernel/crypto.h>
 
 int pc = 0;
 const int pcLimit = 50000;
@@ -42,11 +43,20 @@ int main()
 
     state["StringVector"].SetClass<StringVector>("push", &StringVector::push, "get", &StringVector::get);
 
+    state["Crypto"].SetClass<CryptoKernel::Crypto, bool>("getPublicKey", &CryptoKernel::Crypto::getPublicKey,
+                                                         "getPrivateKey", &CryptoKernel::Crypto::getPrivateKey,
+                                                         "setPublicKey", &CryptoKernel::Crypto::setPublicKey,
+                                                         "setPrivateKey", &CryptoKernel::Crypto::setPrivateKey,
+                                                         "sign", &CryptoKernel::Crypto::sign,
+                                                         "verify", &CryptoKernel::Crypto::verify,
+                                                         "getStatus", &CryptoKernel::Crypto::getStatus
+                                                        );
+
     state["chainTip"].SetObj(chainTip, "height", &CryptoKernel::Blockchain::block::height);
 
     state.Load("./sandbox.lua");
 
-    const bool result = state["verify"]();
+    const bool result = state["verifyTransaction"]();
     std::cout << result;
 
     return 0;
