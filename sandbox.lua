@@ -3,7 +3,6 @@ local e=_ENV
 
 -- sample sandbox environment
 sandbox_env = {
-  StringVector = {new = StringVector.new, get = StringVector.get, push = StringVector.push,},
   Crypto = {new = Crypto.new, getPublicKey = Crypto.getPublicKey, getPrivateKey = Crypto.getPrivateKey,
             setPublicKey = Crypto.setPublicKey, setPrivateKey = Crypto.setPrivateKey,
             getStatus = Crypto.getStatus, sign = Crypto.sign, verify = Crypto.verify,},
@@ -53,7 +52,14 @@ function verifyTransaction()
 end
 
 function verify()
-    if chainTip:height() >= 500 then
+    local genCrypto = Crypto.new(true)
+    local publicKey = genCrypto:getPublicKey()
+    local signature = genCrypto:sign("this is a test signature")
+    genCrypto = nil
+
+    local crypto = Crypto.new()
+    crypto:setPublicKey(publicKey)
+    if chainTip:height() >= 500 and crypto:verify("this is a test signature", signature) then
         return true
     else
         return false

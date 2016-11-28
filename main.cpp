@@ -16,32 +16,54 @@ void programCounterHook(lua_State* luaState, lua_Debug* event)
     }
 }
 
-class StringVector
-{
-    public:
-        StringVector() {}
-        void push(const std::string val)
-        {
-            vec.push_back(val);
-        }
-        std::string get(const int index)
-        {
-            return vec[index];
-        }
-    private:
-        std::vector<std::string> vec;
-};
+static void *l_alloc_restricted (void *ud, void *ptr, size_t osize, size_t nsize)
+    {
+        /* set limit here */
+       int* used = (int*)ud;
+       const int MAX_SIZE = 102400;
+
+       if(ptr == NULL) {
+         /*
+          * <http://www.lua.org/manual/5.2/manual.html#lua_Alloc>:
+          * When ptr is NULL, osize encodes the kind of object that Lua is
+          * allocating.
+          *
+          * Since we don’t care about that, just mark it as 0.
+          */
+         osize = 0;
+       }
+
+       if (nsize == 0){
+         free(ptr);
+         *used -= osize; /* substract old size from used memory */
+         return NULL;
+       }
+       else
+       {
+         if (*used + (nsize - osize) > MAX_SIZE) {/* too much memory in use */
+           return NULL;
+         }
+         ptr = realloc(ptr, nsize);
+         if (ptr) {/* reallocation successful? */
+           *used += (nsize - osize);
+         }
+         return ptr;
+       }
+    }
 
 int main()
 {
     CryptoKernel::Blockchain::block chainTip;
-    chainTip.height = 499;
+    chainTip.height = 500;
 
-    sel::State state{true};
+    std::unique_ptr<int> ud(new int);
+    *(ud.get()) = 0;
+    lua_State* _l = lua_newstate(l_alloc_restricted, ud.get());
+    luaL_openlibs(_l);
+
+    sel::State state(_l);
 
     lua_sethook(state.getState(), &programCounterHook, LUA_MASKCOUNT, 1000);
-
-    state["StringVector"].SetClass<StringVector>("push", &StringVector::push, "get", &StringVector::get);
 
     state["Crypto"].SetClass<CryptoKernel::Crypto, bool>("getPublicKey", &CryptoKernel::Crypto::getPublicKey,
                                                          "getPrivateKey", &CryptoKernel::Crypto::getPrivateKey,
@@ -51,7 +73,6 @@ int main()
                                                          "verify", &CryptoKernel::Crypto::verify,
                                                          "getStatus", &CryptoKernel::Crypto::getStatus
                                                         );
-
     state["chainTip"].SetObj(chainTip, "height", &CryptoKernel::Blockchain::block::height);
 
     state.Load("./sandbox.lua");
