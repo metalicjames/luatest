@@ -1,13 +1,10 @@
--- save a pointer to globals that would be unreachable in sandbox
-local e=_ENV
-
 -- sample sandbox environment
 sandbox_env = {
   Crypto = {new = Crypto.new, getPublicKey = Crypto.getPublicKey, getPrivateKey = Crypto.getPrivateKey,
             setPublicKey = Crypto.setPublicKey, setPrivateKey = Crypto.setPrivateKey,
             getStatus = Crypto.getStatus, sign = Crypto.sign, verify = Crypto.verify,},
   chainTip = {height = chainTip.height},
-  print = print,
+  --print = print,
   --[[ipairs = ipairs,
   next = next,
   pairs = pairs,
@@ -37,32 +34,36 @@ sandbox_env = {
   os = { clock = os.clock, difftime = os.difftime, time = os.time },]]--
 }
 
+local function setfenv(fn, env)
+  local i = 1
+  while true do
+    local name = debug.getupvalue(fn, i)
+    if name == "_ENV" then
+      debug.upvaluejoin(fn, i, (function()
+        return env
+      end), 1)
+      break
+    elseif not name then
+      break
+    end
+
+    i = i + 1
+  end
+
+  return fn
+end
+
 function run_sandbox(sb_env, sb_func, ...)
-  local sb_orig_env=_ENV
   if (not sb_func) then return nil end
-  _ENV=sb_env
+  setfenv(sb_func, sb_env)
   local sb_ret={e.pcall(sb_func, ...)}
-  _ENV=sb_orig_env
   return e.table.unpack(sb_ret)
 end
 
-function verifyTransaction()
-    pcall_rc, result_or_err_msg = run_sandbox(sandbox_env, verify)
+function verifyTransaction(bytecode)
+    local lz4 = require("lz4")
+    f = load(lz4.decompress(bytecode))
+    pcall_rc, result_or_err_msg = run_sandbox(sandbox_env, f)
     return result_or_err_msg
-end
-
-function verify()
-    local genCrypto = Crypto.new(true)
-    local publicKey = genCrypto:getPublicKey()
-    local signature = genCrypto:sign("this is a test signature")
-    genCrypto = nil
-
-    local crypto = Crypto.new()
-    crypto:setPublicKey(publicKey)
-    if chainTip:height() >= 500 and crypto:verify("this is a test signature", signature) then
-        return true
-    else
-        return false
-    end
 end
 
