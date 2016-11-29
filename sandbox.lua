@@ -56,8 +56,8 @@ end
 function run_sandbox(sb_env, sb_func, ...)
   if (not sb_func) then return nil end
   setfenv(sb_func, sb_env)
-  local sb_ret={e.pcall(sb_func, ...)}
-  return e.table.unpack(sb_ret)
+  local sb_ret={_ENV.pcall(sb_func, ...)}
+  return _ENV.table.unpack(sb_ret)
 end
 
 function verifyTransaction(bytecode)
