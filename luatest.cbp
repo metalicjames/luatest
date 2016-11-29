@@ -42,11 +42,9 @@
 			<Add option="-lCryptoKernel" />
 			<Add option="-lcrypto" />
 		</Linker>
+		<Unit filename="compiler.lua" />
 		<Unit filename="main.cpp" />
 		<Unit filename="sandbox.lua" />
-		<Unit filename="test.lua">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
 		<Extensions>
 			<envvars />
 			<code_completion />
